@@ -7,8 +7,10 @@ cd $DIR
 
 # 10 in total
 bm="bfs cutcp histo lbm mri-gridding mri-q sgemm spmv stencil tpacf"
+# bfs lbm mri-gridding 
+bm="cutcp histo mri-q sgemm spmv stencil tpacf"
 
-OUTDIR=~/Dropbox/results/$(hostname)/$(basename $DIR)/
+OUTDIR=$DIR/results/
 mkdir -p $OUTDIR
 
 exe() { echo "++ $@" |& tee -a $OUTDIR/$b.txt ;  if [[ "$1" == "export" ]]; then $@ ; fi ;  $@ |& tee -a $OUTDIR/$b.txt ; }
@@ -20,6 +22,11 @@ for b in $bm; do
 	exe uname -a
 	[[ -x /usr/bin/hwloc-ls ]] && exe hwloc-ls
 	exe export GOMP_CPU_AFFINITY=0-1024 KMP_AFFINITY=explicit,verbose,proclist=[0-1024]
-	exe sudo -E perf stat -A -a -e instructions,cache-misses,cache-references,cycles ./parboil run --no-check $b omp_base large
+    for idx in `seq 1 3`; do
+    	#exe sudo -E perf stat -A -a -e instructions,cache-misses,cache-references,cycles ./parboil run --no-check $b omp_base large
+    	exe sudo -E perf stat -A -a -e \
+        instructions,cache-misses,cache-references,cycles ./parboil run \
+        --no-check $b opencl_nvidia large
+    done
 	echo
 done
