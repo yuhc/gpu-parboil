@@ -438,12 +438,14 @@ int main(int argc, char** argv)
   OCL_ERRCK_RETVAL(clReleaseMemObject(tail));
   //Store the result into a file
   pb_SwitchToTimer(&timers, pb_TimerID_IO);
-  FILE *fp = fopen(params->outFile,"w");
-  fprintf(fp, "%d\n", num_of_nodes);
-  int j = 0;
-  for(j=0;j<num_of_nodes;j++)
-    fprintf(fp,"%d %d\n",j,h_cost[j]);
-  fclose(fp);
+  if (params->outFile) {
+      FILE *fp = fopen(params->outFile,"w");
+      fprintf(fp, "%d\n", num_of_nodes);
+      int j = 0;
+      for(j=0;j<num_of_nodes;j++)
+        fprintf(fp,"%d %d\n",j,h_cost[j]);
+      fclose(fp);
+  }
 
   // cleanup memory
   free(h_graph_nodes);
