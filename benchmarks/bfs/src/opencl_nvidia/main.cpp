@@ -63,7 +63,7 @@ char* readFile(const char* fileName)
   long size = ftell(fp);
   rewind(fp);
 
-  char* buffer = (char*)malloc(sizeof(char)*size);
+  char* buffer = (char*)malloc(sizeof(char)*size + 1);
   if(buffer  == NULL)
   {
     printf("Error 2!\n");
@@ -78,8 +78,9 @@ char* readFile(const char* fileName)
     fclose(fp);
     exit(1);
   }
+  buffer[size] = '\0';
 
-  fclose(fp);                                                                                    
+  fclose(fp);
   return buffer;
 }
 //#include "kernel.cl"
@@ -186,7 +187,7 @@ int main(int argc, char** argv)
   cl_program clProgram = clCreateProgramWithSource(clContext,1,clSource,NULL,&clStatus);
   OCL_ERRCK_VAR(clStatus);
 
-  char clOptions[50];
+  char clOptions[100];
   sprintf(clOptions,"-I src/opencl_nvidia -DMAX_THREADS_PER_BLOCK=%d -DNUM_SM=%d", MAX_THREADS_PER_BLOCK, NUM_SM);
   OCL_ERRCK_RETVAL(clBuildProgram(clProgram,1,&clDevice,clOptions,NULL,NULL));
 
