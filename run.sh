@@ -6,9 +6,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
 # 10 in total
-bm="bfs cutcp histo lbm mri-gridding mri-q sgemm spmv stencil tpacf"
-# bfs lbm mri-gridding 
-bm="cutcp histo mri-q sgemm spmv stencil tpacf"
+# mri-gridding does not work because of no-enough-memory
+bm="bfs cutcp histo lbm mri-q sgemm spmv stencil tpacf"
 
 OUTDIR=$DIR/results/
 mkdir -p $OUTDIR
