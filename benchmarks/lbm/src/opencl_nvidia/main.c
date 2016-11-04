@@ -176,7 +176,9 @@ void MAIN_finalize( const MAIN_Param* param, const OpenCL_Param* prm ) {
         pb_SwitchToTimer(&timers, pb_TimerID_COMPUTE);
 	LBM_showGridStatistics( TEMP_srcGrid );
 
-	LBM_storeVelocityField( TEMP_srcGrid, param->resultFilename, TRUE );
+    if (param->resultFilename) {
+    	LBM_storeVelocityField( TEMP_srcGrid, param->resultFilename, TRUE );
+    }
 
 	LBM_freeGrid( (float**) &TEMP_srcGrid );
 	OpenCL_LBM_freeGrid( OpenCL_srcGrid );

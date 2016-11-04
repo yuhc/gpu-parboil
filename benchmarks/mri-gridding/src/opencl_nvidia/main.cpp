@@ -187,29 +187,29 @@ int main (int argc, char* argv[]){
     }
     exit(1);
   }
-  
+
   cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) clPlatform, 0};
   clContext = clCreateContextFromType(cps, deviceType, NULL, NULL, &ciErrNum);
   OCL_ERRCK_VAR(ciErrNum);
 
   cl_command_queue clCommandQueue = clCreateCommandQueue(clContext, clDevice, CL_QUEUE_PROFILING_ENABLE, &ciErrNum);
   OCL_ERRCK_VAR(ciErrNum);
-  
+
   cl_uint workItemDimensions;
   OCL_ERRCK_RETVAL( clGetDeviceInfo(clDevice, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, sizeof(cl_uint), &workItemDimensions, NULL) );
-  
+
   size_t workItemSizes[workItemDimensions];
   OCL_ERRCK_RETVAL( clGetDeviceInfo(clDevice, CL_DEVICE_MAX_WORK_ITEM_SIZES, workItemDimensions*sizeof(size_t), workItemSizes, NULL) );
-  
+
   pb_SetOpenCL(&clContext, &clCommandQueue);
-    
+
     /*
   samplesPin = clCreateBuffer(clContext, CL_MEM_ALLOC_HOST_PTR, 
       params.numSamples*sizeof(ReconstructionSample),
       NULL, &ciErrNum);
 */
   samples = (ReconstructionSample *) malloc ( params.numSamples*sizeof(ReconstructionSample) );
-  
+
   /*(ReconstructionSample *) clEnqueueMapBuffer(clCommandQueue, samplesPin, CL_TRUE, CL_MAP_WRITE, 0, params.numSamples*sizeof(ReconstructionSample), 0, NULL, NULL, &ciErrNum);
   OCL_ERRCK_VAR(ciErrNum);
 */

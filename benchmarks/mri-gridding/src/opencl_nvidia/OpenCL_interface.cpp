@@ -14,7 +14,6 @@
 #include "parboil.h"
 
 #include "UDTypes.h"
-#include "scanLargeArray.h"
 #include "CPU_kernels.h"
 
 #include "sort.h"
@@ -132,15 +131,14 @@ void OpenCL_interface (
   unsigned int *zeroData = NULL, *maxIntData = NULL;
   
   size_t sizeZeroData = sizeof(float)* 2 * gridNumElems;
-  if ( n*sizeof(ReconstructionSample) > sizeZeroData) {
-    sizeZeroData = n*sizeof(ReconstructionSample);
-  }    
+  if ( (n+npad)*sizeof(ReconstructionSample) > sizeZeroData) {
+    sizeZeroData = (n+npad)*sizeof(ReconstructionSample);
+  }
   if ( (sizeof(unsigned int) * (gridNumElems+1)) > sizeZeroData) {
     // Not going to be taken, but included just in case since this is used for multiple variables
-    sizeZeroData = sizeof(unsigned int) * (gridNumElems+1);
-  }
   if ( (((n+3)/4)*4)*sizeof(unsigned int) > sizeZeroData) {
     sizeZeroData = (((n+3)/4)*4)*sizeof(unsigned int);
+  }
   }
   
   zeroData = (unsigned int *) malloc(sizeZeroData);
@@ -238,7 +236,11 @@ void OpenCL_interface (
   
   size_t block1[1] = { blockSize };
   size_t grid1[1] = { ((n+blockSize-1)/blockSize)*block1[0] };
-    
+
+  size_t kernel_work_group_size;
+  clGetKernelWorkGroupInfo(reorder_kernel, clDevice, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &kernel_work_group_size, NULL);
+  printf("Max work_group_size = %d\n", kernel_work_group_size);
+
   pb_SwitchToTimer(timers, pb_TimerID_KERNEL);
 
   /* STEP 1: Perform binning. This kernel determines which output bin each input element
@@ -250,11 +252,9 @@ void OpenCL_interface (
   /* STEP 2: Sort the index-value pair generate in the binning kernel */
   cl_mem dkeys_o = clCreateBuffer(clContext, CL_MEM_READ_WRITE, n*sizeof(unsigned int), NULL, &ciErrNum); OCL_ERRCK_VAR(ciErrNum);
   cl_mem dvalues_o = clCreateBuffer(clContext, CL_MEM_READ_WRITE, n*sizeof(unsigned int), NULL, &ciErrNum); OCL_ERRCK_VAR(ciErrNum);
-    
+
   cl_mem *dkeys_oPtr = &dkeys_o;
   cl_mem *dvalues_oPtr = &dvalues_o;
-  
-  cl_mem *beforePointer = idxKey_dPtr;
 
   sort(n, gridNumElems+1, idxKey_dPtr, idxValue_dPtr, dkeys_oPtr, dvalues_oPtr, clContext, clCommandQueue, clDevice, workItemSizes);
 
@@ -267,7 +267,7 @@ void OpenCL_interface (
    * that will be computed on the CPU.
    */
   OCL_ERRCK_RETVAL( clSetKernelArg(reorder_kernel, 1, sizeof(cl_mem), (void *)idxValue_dPtr) );
-  
+
   OCL_ERRCK_RETVAL ( clEnqueueNDRangeKernel(clCommandQueue, reorder_kernel, 1, 0,
                             grid1, block1, 0, 0, 0) );
 
@@ -344,7 +344,7 @@ void OpenCL_interface (
                           gridNumElems*sizeof(float), // Size of data to write
                           sampleDensity, // Host Source
                           0, NULL, NULL) );                          
-                          
+
   OCL_ERRCK_RETVAL( clEnqueueReadBuffer(clCommandQueue, gridData_d, CL_TRUE, 
                           0, // Offset in bytes
                           gridNumElems*sizeof(cmplx), // Size of data to write

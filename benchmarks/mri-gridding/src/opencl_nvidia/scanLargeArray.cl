@@ -5,15 +5,16 @@
  *                         All Rights Reserved
  *
  ***************************************************************************/
- 
+
 #define BLOCK_SIZE 1024
 #define GRID_SIZE 65535
 #define NUM_BANKS 16
 #define LOG_NUM_BANKS 4
 
+#define min(a, b) (a>b?b:a)
 //#define CONFLICT_FREE_OFFSET(index) ((index) >> LOG_NUM_BANKS + (index) >> (2*LOG_NUM_BANKS))
 #define LNB LOG_NUM_BANKS
-#define CONFLICT_FREE_OFFSET(index) (((unsigned int)(index) >> min((unsigned int)(LNB)+(index), (unsigned int)(32-(2*LNB))))>>(2*LNB))
+#define CONFLICT_FREE_OFFSET(index) (((unsigned int)(index) >> (min((unsigned int)((LNB)+(index)), (unsigned int)(32-(2*LNB))))>>(2*LNB)))
 #define EXPANDED_SIZE(__x) (__x+(__x>>LOG_NUM_BANKS)+(__x>>(2*LOG_NUM_BANKS)))
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +23,7 @@
 __kernel void scan_L1_kernel(unsigned int n, __global unsigned int* dataBase, unsigned int data_offset, __global unsigned int* interBase, unsigned int inter_offset)
 {
     __local unsigned int s_data[EXPANDED_SIZE(BLOCK_SIZE)]; 
-    
+
     __global unsigned int *data = dataBase + data_offset;
     __global unsigned int *inter = interBase + inter_offset;
 
@@ -83,13 +84,12 @@ __kernel void scan_L1_kernel(unsigned int n, __global unsigned int* dataBase, un
         s_data[bi] += t;
       }
     }
-    
+
     barrier(CLK_LOCAL_MEM_FENCE ); //__syncthreads();
 
     if (g_ai < n) { data[g_ai] = s_data[s_ai]; }
     if (g_bi < n) { data[g_bi] = s_data[s_bi]; }
 }
-
 
 
 __kernel void scan_inter1_kernel(__global unsigned int* data, unsigned int iter)
@@ -183,10 +183,10 @@ __kernel void scan_inter2_kernel(__global unsigned int* data, unsigned int iter)
 __kernel void uniformAdd(unsigned int n, __global unsigned int *dataBase, unsigned int data_offset, __global unsigned int *interBase, unsigned int inter_offset)
 {
     __local unsigned int uni;
-    
+
     __global unsigned int *data = dataBase + data_offset;
     __global unsigned int *inter = interBase + inter_offset;
-       
+
     if (get_local_id(0) == 0) { uni = inter[get_group_id(0)]; }
     barrier(CLK_LOCAL_MEM_FENCE ); //__syncthreads();
 

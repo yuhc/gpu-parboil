@@ -14,6 +14,7 @@
 
 #define SORT_BS 256
 
+#define min(a, b) (a>b?b:a)
 //#define CONFLICT_FREE_OFFSET(index) ((index) >> LNB + (index) >> (2*LNB))
 #define CONFLICT_FREE_OFFSET(index) (((unsigned int)(index) >> min((unsigned int)(LNB)+(index), (unsigned int)(32-(2*LNB))))>>(2*LNB))
 #define BLOCK_P_OFFSET (4*SORT_BS+1+(4*SORT_BS+1)/16+(4*SORT_BS+1)/64)

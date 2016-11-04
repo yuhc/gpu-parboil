@@ -62,11 +62,12 @@ __kernel void reorder_kernel(int n,
                                __global unsigned int* idxValue_g, 
                                __global ReconstructionSample* samples_g, 
  //                              sampleArrayStruct sortedSampleSoA_g
-                               
+
+//                               __global float2* dataptr_g,
                                __global float2* dataptr_g,
                                unsigned int f2_offset
 //                               __global float4* locptr_g
-                               
+
                                ){
   unsigned int index = get_group_id(0)*get_local_size(0) + get_local_id(0);
   unsigned int old_index;
