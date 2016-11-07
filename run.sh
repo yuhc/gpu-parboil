@@ -21,11 +21,13 @@ for b in $bm; do
 	exe uname -a
 	[[ -x /usr/bin/hwloc-ls ]] && exe hwloc-ls
 	exe export GOMP_CPU_AFFINITY=0-1024 KMP_AFFINITY=explicit,verbose,proclist=[0-1024]
-    for idx in `seq 1 3`; do
+    for idx in `seq 1 10`; do
     	#exe sudo -E perf stat -A -a -e instructions,cache-misses,cache-references,cycles ./parboil run --no-check $b omp_base large
-    	exe sudo -E perf stat -A -a -e \
-        instructions,cache-misses,cache-references,cycles ./parboil run \
-        --no-check $b opencl_nvidia large
+    	#exe sudo -E perf stat -A -a -e \
+        #instructions,cache-misses,cache-references,cycles ./parboil run \
+        #--no-check $b opencl_nvidia large
+    	exe time ./parboil run --no-check $b opencl_nvidia large
+
     done
 	echo
 done
